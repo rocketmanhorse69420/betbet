@@ -1,0 +1,102 @@
+// Configurations
+const sheetID = '1AjXWkL5gT2fecFAQKMBlBMnEXJZR1nqFtZ2oUBSN0XM';
+const sheetURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=Bets`;
+
+const betForm = document.getElementById('betForm');
+const loading = document.getElementById('loading');
+const errorDiv = document.getElementById('error');
+const betsTable = document.getElementById('betsTable');
+const totalAmountDiv = document.getElementById('totalAmount');
+const clearBtn = document.getElementById('clearBtn');
+
+let betsData = [];
+
+async function fetchBets() {
+    try {
+        loading.classList.remove('hidden');
+        const response = await fetch(sheetURL);
+        const text = await response.text();
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        
+        const rows = json.table.rows;
+        betsData = rows.map(row => {
+            return {
+                RaceID: row.c[0]?.v,
+                HorseName: row.c[1]?.v,
+                BetType: row.c[2]?.v,
+                BetAmount: parseFloat(row.c[3]?.v),
+                ExpectedROI: parseFloat(row.c[4]?.v)
+            };
+        });
+
+        sessionStorage.setItem('betsData', JSON.stringify(betsData));
+    } catch (error) {
+        console.error("Error fetching sheet:", error);
+        errorDiv.textContent = "Error fetching bets. Upload CSV manually.";
+        errorDiv.classList.remove('hidden');
+    } finally {
+        loading.classList.add('hidden');
+    }
+}
+
+function displayBets(filteredBets) {
+    const tbody = betsTable.querySelector('tbody');
+    tbody.innerHTML = '';
+
+    if (filteredBets.length === 0) {
+        errorDiv.textContent = "No races available for this date/track.";
+        errorDiv.classList.remove('hidden');
+        betsTable.classList.add('hidden');
+        totalAmountDiv.classList.add('hidden');
+        return;
+    }
+
+    let total = 0;
+    filteredBets.forEach(bet => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${bet.HorseName}</td>
+            <td>${bet.BetType}</td>
+            <td>$${bet.BetAmount.toFixed(2)}</td>
+            <td>${bet.ExpectedROI.toFixed(2)}%</td>
+        `;
+        tbody.appendChild(row);
+        total += bet.BetAmount;
+    });
+
+    totalAmountDiv.textContent = `Total: $${total.toFixed(2)}`;
+    totalAmountDiv.classList.remove('hidden');
+    betsTable.classList.remove('hidden');
+    errorDiv.classList.add('hidden');
+}
+
+betForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const dateInput = document.getElementById('date').value;
+    const trackInput = document.getElementById('track').value;
+
+    if (!dateInput || !trackInput) {
+        errorDiv.textContent = "Please fill in all fields.";
+        errorDiv.classList.remove('hidden');
+        return;
+    }
+
+    if (!sessionStorage.getItem('betsData')) {
+        await fetchBets();
+    } else {
+        betsData = JSON.parse(sessionStorage.getItem('betsData'));
+    }
+
+    const filteredBets = betsData.filter(bet => 
+        bet.RaceID && bet.RaceID.toString().includes(trackInput) // very basic matching for now
+    );
+
+    displayBets(filteredBets);
+});
+
+clearBtn.addEventListener('click', () => {
+    betForm.reset();
+    betsTable.classList.add('hidden');
+    totalAmountDiv.classList.add('hidden');
+    errorDiv.classList.add('hidden');
+});

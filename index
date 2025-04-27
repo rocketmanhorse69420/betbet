@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HorseBetMax - Horse Betting Optimizer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <h1>HorseBetMax</h1>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">About</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="form-section">
+            <form id="betForm">
+                <label for="date">Race Date:</label>
+                <input type="date" id="date" required>
+
+                <label for="track">Track:</label>
+                <select id="track" required>
+                    <option value="">Select Track</option>
+                    <option value="Santa Anita">Santa Anita</option>
+                    <option value="Churchill Downs">Churchill Downs</option>
+                    <option value="Gulfstream Park">Gulfstream Park</option>
+                    <option value="Del Mar">Del Mar</option>
+                    <option value="Belmont Park">Belmont Park</option>
+                    <!-- Easily editable list -->
+                </select>
+
+                <label for="budget">Budget ($):</label>
+                <input type="number" id="budget" min="10" max="100" value="20" required>
+
+                <div class="buttons">
+                    <button type="submit" class="get-bets">Get Bets</button>
+                    <button type="button" id="clearBtn" class="clear">Clear</button>
+                </div>
+            </form>
+
+            <div id="loading" class="loading hidden">Loading...</div>
+            <div id="error" class="error hidden"></div>
+        </section>
+
+        <section class="table-section">
+            <table id="betsTable" class="hidden">
+                <thead>
+                    <tr>
+                        <th>Horse Name</th>
+                        <th>Bet Type</th>
+                        <th>Bet Amount</th>
+                        <th>Expected ROI (%)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="totalAmount" class="total hidden"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Bet within limits. Visit <a href="https://www.gamblinghelponline.org.au" target="_blank">gamblinghelponline.org.au</a> or call 1800 858 858.</p>
+        <p>Contact: <a href="mailto:rocketmanhorse69420@example.com">rocketmanhorse69420@example.com</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
